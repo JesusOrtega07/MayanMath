@@ -11,6 +11,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
     case calculator
     case home
     case numbers
+    case challenges
     case operations
     case achievements
 
@@ -22,6 +23,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .calculator: "Calculadora"
         case .home: "Inicio"
         case .numbers: "Números"
+        case .challenges: "Retos"
         case .operations: "Operaciones matemáticas"
         case .achievements: "Logros"
         }
@@ -33,6 +35,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .calculator: "Calculadora maya"
         case .home: "¡Bienvenido a MayanMath!"
         case .numbers: "Aprendo a representar números mayas"
+        case .challenges: "Retos mayas"
         case .operations: "Aprendemos operaciones mayas"
         case .achievements: "Mis logros"
         }
@@ -42,7 +45,8 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .calculator: "Arrastra o toca los símbolos para formar tus números"
         case .home: "Aprende matemáticas mientras descubres una cultura increíble"
-        case .numbers: "Arrastra los símbolos mayas para formar el número"
+        case .numbers: "Toca un número para ver cómo se forma"
+        case .challenges: "Convierte el número a maya con los símbolos"
         case .operations: "Resuelve las operaciones usando los símbolos mayas"
         case .achievements: "Cada reto completado te acerca a ser un maestro maya"
         }
@@ -60,6 +64,9 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .numbers:
             Image(systemName: "square.grid.3x3.fill")
                 .font(.system(size: size * 0.85, weight: .bold))
+        case .challenges:
+            Image(systemName: "target")
+                .font(.system(size: size * 0.85, weight: .bold))
         case .operations:
             CalculatorIcon(size: size)
         case .achievements:
@@ -71,7 +78,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
 
 /// Idiomas de la app. El Mam no existe como idioma del sistema,
 /// por eso el idioma se elige dentro de la app (tocando el avatar).
-enum AppLanguage: String, CaseIterable, Identifiable {
+nonisolated enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     case spanish = "es"
     case english = "en"
     case mam = "mam"

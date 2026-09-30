@@ -92,7 +92,7 @@ struct CalculatorView: View {
 // MARK: - Ficha flotante
 
 /// Vista aparte para que solo ella se redibuje mientras el dedo se mueve.
-private struct DragGhostLayer: View {
+struct DragGhostLayer: View {
     let drag: PaletteDragModel
 
     var body: some View {

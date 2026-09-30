@@ -2,7 +2,7 @@
 //  AppSidebar.swift
 //  MayanMath
 //
-//  Barra lateral con las 5 secciones. El fondo de la sección activa
+//  Barra lateral con las 6 secciones. El fondo de la sección activa
 //  se desliza entre botones (matchedGeometryEffect).
 //
 
@@ -32,7 +32,7 @@ struct AppSidebar: View {
                             .minimumScaleFactor(0.85)
                     }
                     .foregroundStyle(isActive ? Palette.navActiveText : Color(hex: 0x241B16))
-                    .frame(maxWidth: .infinity, minHeight: 96)
+                    .frame(maxWidth: .infinity, minHeight: 84)
                     .background {
                         if isActive {
                             RoundedRectangle(cornerRadius: 20, style: .continuous)

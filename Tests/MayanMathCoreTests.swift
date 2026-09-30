@@ -232,3 +232,101 @@ struct CalculatorViewModelTests {
         #expect(vm.result?.value.value == 7)
     }
 }
+
+// MARK: - Explicaciones 1–30
+
+struct NumberExplanationTests {
+    @Test func etapas() {
+        #expect(NumberExplanation(3).stage == .onlyDots)
+        #expect(NumberExplanation(5).stage == .firstBar)
+        #expect(NumberExplanation(13).stage == .barsAndDots)
+        #expect(NumberExplanation(20).stage == .twenty)
+        #expect(NumberExplanation(27).stage == .withTwenties)
+    }
+
+    @Test func sumandosDeArribaHaciaAbajo() {
+        #expect(NumberExplanation(23).addends == [20, 3])
+        #expect(NumberExplanation(20).addends == [20, 0])
+        #expect(NumberExplanation(13).addends == [13])
+    }
+
+    @Test(arguments: 1...30)
+    func todosLosNumerosSeExplican(_ value: Int) {
+        let e = NumberExplanation(value)
+        #expect(e.addends.reduce(0, +) == value)
+    }
+}
+
+// MARK: - Retos
+
+struct ChallengeTests {
+    @Test func catalogo() {
+        #expect(ChallengeCatalog.numbers.first == 1)
+        #expect(ChallengeCatalog.numbers.last == 30)
+        #expect(ChallengeCatalog.next(after: 30) == nil)
+        #expect(ChallengeCatalog.firstPending(completed: [1, 2, 3]) == 4)
+    }
+
+    @Test func estrellas() {
+        #expect(ChallengeScoring.stars(forAttempts: 1) == 10)
+        #expect(ChallengeScoring.stars(forAttempts: 3) == 5)
+    }
+
+    @Test func evaluacion() throws {
+        let target = MayanNumber(23)
+        var b = MayanNumberBuilder(maxLevels: 2)
+        #expect(ChallengeEvaluator.evaluate(target: target, built: b) == .empty)
+
+        try b.add(MayanDigit(3)!, toLevel: 0)
+        #expect(ChallengeEvaluator.evaluate(target: target, built: b) == .wrongTwenties(tooMany: false))
+
+        try b.add(MayanDigit(1)!, toLevel: 1)
+        #expect(ChallengeEvaluator.evaluate(target: target, built: b) == .correct)
+
+        try b.add(MayanDigit(1)!, toLevel: 0)
+        #expect(ChallengeEvaluator.evaluate(target: target, built: b) == .wrongUnits(tooMany: true))
+    }
+
+    @Test func pistas() {
+        let hints = ChallengeHint.hints(for: MayanNumber(23))
+        #expect(hints.count == 3)
+        #expect(hints[0] == .twenties(target: 23, count: 1))
+        #expect(hints[1] == .units(digit: MayanDigit(3)!))
+    }
+}
+
+@MainActor
+struct ChallengeViewModelTests {
+    @Test func fallarReintentarYAcertar() {
+        let vm = ChallengeViewModel(number: 7)
+        vm.drop(MayanDigit(6)!, onLevel: 0)
+        vm.check()
+        #expect(vm.phase == .wrong(.wrongUnits(tooMany: false)))
+        #expect(vm.shouldSuggestHint)
+
+        vm.revealHint()
+        #expect(vm.revealedHints == 1)
+
+        vm.drop(MayanDigit(1)!, onLevel: 0)   // 7
+        #expect(vm.phase == .building)
+        vm.check()
+        #expect(vm.phase == .correct(earnedStars: 5)) // segundo intento
+    }
+
+    @Test func primerIntentoDa10() {
+        let vm = ChallengeViewModel(number: 20)
+        vm.drop(MayanDigit(1)!, onLevel: 1)
+        vm.check()
+        #expect(vm.phase == .correct(earnedStars: 10))
+        vm.next()
+        #expect(vm.target.value == 21)
+        #expect(vm.builder.isEmpty)
+    }
+
+    @Test func noSeEditaDespuesDeAcertar() {
+        let vm = ChallengeViewModel(number: 1)
+        vm.drop(MayanDigit(1)!, onLevel: 0)
+        vm.check()
+        #expect(vm.drop(MayanDigit(1)!, onLevel: 0) == false)
+    }
+}

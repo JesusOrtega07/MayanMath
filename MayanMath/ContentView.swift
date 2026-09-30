@@ -6,17 +6,25 @@
 //  La app abre en la Calculadora.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
     @State private var section: AppSection = .calculator
-    /// Vive aquí para que la calculadora conserve sus números al cambiar de sección.
+    /// Los ViewModels viven aquí para conservar su estado al cambiar de sección.
     @State private var calculator = CalculatorViewModel()
+    @State private var challenge = ChallengeViewModel()
+
     @AppStorage("appLanguage") private var language: AppLanguage = .spanish
+    @Environment(\.modelContext) private var modelContext
+    @Query private var records: [ChallengeRecord]
+
+    private var totalStars: Int { records.reduce(0) { $0 + $1.stars } }
+    private var completedNumbers: Set<Int> { Set(records.map(\.number)) }
 
     var body: some View {
         VStack(spacing: 0) {
-            AppHeader(section: section, stars: 0, language: $language)
+            AppHeader(section: section, stars: totalStars, language: $language)
 
             HStack(spacing: 0) {
                 AppSidebar(selection: $section)
@@ -25,7 +33,24 @@ struct ContentView: View {
                     switch section {
                     case .calculator:
                         CalculatorView(viewModel: calculator)
-                    default:
+                    case .home:
+                        HomeView(
+                            completedChallenges: completedNumbers.count,
+                            totalChallenges: ChallengeCatalog.numbers.count,
+                            onContinue: {
+                                challenge.select(ChallengeCatalog.firstPending(completed: completedNumbers))
+                                go(to: .challenges)
+                            },
+                            onOpen: { go(to: $0) }
+                        )
+                    case .numbers:
+                        NumbersView(onPractice: { number in
+                            challenge.select(number)
+                            go(to: .challenges)
+                        })
+                    case .challenges:
+                        ChallengesView(viewModel: challenge)
+                    case .operations, .achievements:
                         ComingSoonView(section: section)
                     }
                 }
@@ -36,6 +61,15 @@ struct ContentView: View {
         }
         .background(Palette.appBackground.ignoresSafeArea())
         .fontDesign(.rounded)
+        .onAppear {
+            challenge.attach(ProgressRepository(context: modelContext))
+        }
+    }
+
+    private func go(to newSection: AppSection) {
+        withAnimation(.spring(duration: 0.45, bounce: 0.25)) {
+            section = newSection
+        }
     }
 }
 
@@ -61,4 +95,5 @@ struct ComingSoonView: View {
 
 #Preview(traits: .landscapeLeft) {
     ContentView()
+        .modelContainer(for: ChallengeRecord.self, inMemory: true)
 }

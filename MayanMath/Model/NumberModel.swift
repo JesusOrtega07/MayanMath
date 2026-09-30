@@ -8,5 +8,6 @@
 import Foundation
 
 struct mayanNumber{
-    
+    let number: Int
+    let icon: Int
 }
